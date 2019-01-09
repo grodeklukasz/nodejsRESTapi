@@ -1,5 +1,8 @@
 import express from 'express';
 import db from './db/db';
+
+import dbBooks from './db/dbBooks';
+
 import bodyParser from 'body-parser';
 
 const app = express();
@@ -10,54 +13,55 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 //get all todos
 
-app.get('/api/v1/todos', (req, res)=>{
+app.get('/api/v1/books', (req, res)=>{
     res.status(200).send({
         success: 'true',
         message: 'todos retrieved success',
-        todos: db
+        books: dbBooks
     })
 });
 
-app.post('/api/v1/todos', (req,res)=>{
+app.post('/api/v1/books', (req,res)=>{
    
-    if(!req.body.title){
+    if(!req.body.author){
+        return res.status(400).send({
+            success: 'false',
+            message: 'author is required'
+        });
+    }else if(!req.body.title){
         return res.status(400).send({
             success: 'false',
             message: 'title is required'
         });
-    }else if(!req.body.description){
-        return res.status(400).send({
-            success: 'false',
-            message: 'description is required'
-        });
     }
 
-    const todo = {
-        id: db.length + 1,
-        title: req.body.title,
-        description: req.body.description
+    const book = {
+        id: dbBooks.length + 1,
+        author: req.body.author,
+        title: req.body.title
     }
     
-    db.push(todo);
+    dbBooks.push(book);
 
     return res.status(201).send({
         success: 'true',
-        message: 'todo added successfully',
-        todo
+        message: 'Book added successfully',
+        book
     })
 });
 
-app.get('/api/v1/todos/:id', (req,res) => {
+app.get('/api/v1/books/:id', (req,res) => {
     
     const id = parseInt(req.params.id, 10);
 
-    db.map((todo)=>{
-        if(todo.id===id){
+
+    dbBooks.map((book)=>{
+        if(book.id===id){
             
             return res.status(200).send({
                 success: 'true',
-                message: 'todo retrieved successfully',
-                todo,
+                message: 'book retrieved successfully',
+                book,
             });
 
         }
@@ -66,28 +70,28 @@ app.get('/api/v1/todos/:id', (req,res) => {
 
     return res.status(404).send({
         success: 'false',
-        message: 'todo does not exist',
+        message: 'book does not exist',
     });
 
     
 });
 
-app.delete('/api/v1/todos/:id',(req,res)=>{
+app.delete('/api/v1/books/:id',(req,res)=>{
     const id = parseInt(req.params.id, 10);
 
-    db.map((todo,index)=>{
-        if(todo.id===id){
-            db.splice(index, 1);
+    dbBooks.map((book,index)=>{
+        if(book.id===id){
+            dbBooks.splice(index, 1);
             return res.status(200).send({
                 success: 'true',
-                message: 'Todo deleted successfuly',
+                message: 'Book deleted successfuly',
             });
         }
     });
 
     return res.status(404).send({
         success: 'false',
-        message: 'todo not found',
+        message: 'Book not found',
     });
 });
 
@@ -136,6 +140,7 @@ app.put('/api/v1/todos/:id',(req,res)=>{
         message: ' todo updated successfully',
         updatedTodo,
     });
+
 
 
 
